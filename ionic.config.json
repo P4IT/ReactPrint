@@ -1,0 +1,7 @@
+{
+  "name": "ReactPrint",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
