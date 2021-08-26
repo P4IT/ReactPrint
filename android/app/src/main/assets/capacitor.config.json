@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "ReactPrint",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}
