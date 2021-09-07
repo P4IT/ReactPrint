@@ -218,7 +218,7 @@ export class Home extends Component {
             <IonCardContent>
             <IonList>
                 {this.state.devices.map((dev) => (
-                  <IonItem><IonText>{dev.name} - {dev.address}</IonText></IonItem>
+                  <IonItem onClick={() => this.connectToPrinter(dev.address)}><IonText>{dev.name} - {dev.address}</IonText></IonItem>
                 ))}
               </IonList>
               <IonList>
