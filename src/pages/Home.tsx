@@ -1,6 +1,7 @@
-import { IonLoading, IonRow, IonCol, IonButton, IonCard, IonCardContent, IonContent, IonFooter, IonHeader, IonItem, IonLabel, IonList, IonPage, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar } from '@ionic/react';
+import { IonLoading, IonRow, IonCol, IonInput, IonButton, IonCard, IonCardContent, IonContent, IonFooter, IonHeader, IonItem, IonLabel, IonList, IonPage, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import ExploreContainer from '../components/ExploreContainer';
 import './Home.css';
+import { Filesystem, Encoding, Directory } from '@capacitor/filesystem';
 import { CIDPrint, CIDPrinterListenerTypes, Device, EventType, PrinterLibraryEvent, PrinterLibraryActionType, InitResult, PrinterResult, TicketData, BluetoothResult, DeviceResult } from '@captureid/capacitor3-cidprint';
 import React, { Component, useState } from 'react';
 
@@ -25,11 +26,12 @@ export class Home extends Component {
     devmac: '',
     devices: Array<Device>(),
     statuslist: Array<string>(),
-    status: ''
+    status: '',
+    label: ''
   }
   constructor(props: any) {
     super(props);
-    this.state = { enabled: false, connected: false, validbt: false, btaddress: '', devname: '', devmac: '', devices: [], statuslist: [], status: '' }
+    this.state = { enabled: false, connected: false, validbt: false, btaddress: '', devname: '', devmac: '', devices: [], statuslist: [], status: '', label: '' }
     this.init();
   }
 
@@ -100,6 +102,10 @@ export class Home extends Component {
     }
   }
 
+  async writeLabel(){
+
+  }
+
   async enableBluetooth() {
     this.setState({ enabled: await CIDPrint.enableBluetoothPrinting({ enable: true }) })
   }
@@ -128,6 +134,12 @@ export class Home extends Component {
     this.setState({ status: 'printing Label' });
     CIDPrint.enableDispendingMode({ enable: false });
     await CIDPrint.printLabel({ label: label });
+  }
+
+  async printInput(inputLabel: string) {
+    this.setState({ status: 'printing Label' });
+    CIDPrint.enableDispendingMode({ enable: false });
+    await CIDPrint.printData({ data: inputLabel });
   }
 
   async printWithData(label: string, data: string[]) {
@@ -185,6 +197,8 @@ export class Home extends Component {
                 <IonSelectOption value="00182f9d469e">PC23D</IonSelectOption>
                 <IonSelectOption value="f0a3b253c3eb">PC23D Firma</IonSelectOption>
                 <IonSelectOption value="0017E90651FF">PC23D Firma II</IonSelectOption>
+                <IonSelectOption value="0017E90B6BA6">PC23D Mark</IonSelectOption>
+                <IonSelectOption value="00182f9d4c9b">PC23D Seb</IonSelectOption>
                 <IonSelectOption value="000190ec07e9">MB200i</IonSelectOption>
                 <IonSelectOption value="000190e6b756">MB200i (2)</IonSelectOption>
                 <IonSelectOption value="000190ec15a7">MB200i Firma</IonSelectOption>
@@ -195,6 +209,9 @@ export class Home extends Component {
           <IonButton onClick={() => this.connectToPrinter(this.barcodevalue)}>Connect</IonButton>
           <IonButton onClick={() => this.getStatus()}>Get Printer Status</IonButton>
           <IonButton onClick={() => this.setMediaSize(46, 37)}>Set Media Size</IonButton>
+          <IonButton onClick={() => this.print('label22.dat')}>Print Label</IonButton>
+          <IonInput onIonChange={(e: any) => this.setState({ label: e.target.value})}></IonInput>
+          <IonButton onClick={() => this.printInput(this.state.label)}>Print Label</IonButton>
         </IonContent>
         <IonContent>
           <IonCard>
