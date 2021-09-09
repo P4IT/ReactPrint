@@ -1,7 +1,7 @@
 import { IonLoading, IonRow, IonCol, IonInput, IonButton, IonCard, IonCardContent, IonContent, IonFooter, IonHeader, IonItem, IonLabel, IonList, IonPage, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import ExploreContainer from '../components/ExploreContainer';
 import './Home.css';
-import { Filesystem, Encoding, Directory } from '@capacitor/filesystem';
+import { Filesystem, Encoding, Directory, GetUriOptions } from '@capacitor/filesystem';
 import { CIDPrint, CIDPrinterListenerTypes, Device, EventType, PrinterLibraryEvent, PrinterLibraryActionType, InitResult, PrinterResult, TicketData, BluetoothResult, DeviceResult } from '@captureid/capacitor3-cidprint';
 import React, { Component, useState } from 'react';
 
@@ -166,6 +166,10 @@ export class Home extends Component {
     this.bthasFocus = focus;
   }
 
+  public async printESCPOS() {
+    CIDPrint.printLabel({label: 'lbl.bin'});
+  }
+
   getStatus() {
     CIDPrint.getPrinterStatus();
   }
@@ -212,6 +216,7 @@ export class Home extends Component {
           <IonButton onClick={() => this.print('label22.dat')}>Print Label</IonButton>
           <IonInput onIonChange={(e: any) => this.setState({ label: e.target.value})}></IonInput>
           <IonButton onClick={() => this.printInput(this.state.label)}>Print Label</IonButton>
+          <IonButton onClick={() => this.printESCPOS()}>Print Receipt</IonButton>
         </IonContent>
         <IonContent>
           <IonCard>
