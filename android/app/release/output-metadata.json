@@ -5,7 +5,7 @@
     "kind": "Directory"
   },
   "applicationId": "io.ionic.starter",
-  "variantName": "processReleaseResources",
+  "variantName": "release",
   "elements": [
     {
       "type": "SINGLE",

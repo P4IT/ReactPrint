@@ -1,4 +1,4 @@
-import { IonLoading, IonRow, IonCol, IonInput, IonButton, IonCard, IonCardContent, IonContent, IonFooter, IonHeader, IonItem, IonLabel, IonList, IonPage, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar } from '@ionic/react';
+import { IonLoading, IonRow, IonCol, IonInput, IonTextarea, IonButton, IonCard, IonCardContent, IonContent, IonFooter, IonHeader, IonItem, IonLabel, IonList, IonPage, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import ExploreContainer from '../components/ExploreContainer';
 import './Home.css';
 import { Filesystem, Encoding, Directory, GetUriOptions } from '@capacitor/filesystem';
@@ -27,11 +27,12 @@ export class Home extends Component {
     devices: Array<Device>(),
     statuslist: Array<string>(),
     status: '',
-    label: ''
+    label: '',
+    load: false
   }
   constructor(props: any) {
     super(props);
-    this.state = { enabled: false, connected: false, validbt: false, btaddress: '', devname: '', devmac: '', devices: [], statuslist: [], status: '', label: '' }
+    this.state = { enabled: false, connected: false, validbt: false, btaddress: '', devname: '', devmac: '', devices: [], statuslist: [], status: '', label: '', load: false }
     this.init();
   }
 
@@ -55,7 +56,7 @@ export class Home extends Component {
       case PrinterLibraryActionType.DISCOVER_FINISH:
         let devs: BluetoothResult = event.data as BluetoothResult;
         let devi = devs.discovereddevice as Device;
-        if(devi != undefined){
+        if (devi != undefined) {
           this.devices.push(devi);
         }
         //console.log(dev);
@@ -83,7 +84,7 @@ export class Home extends Component {
         this.statuslist.push(event.action + ' - ' + event.type + ' - ' + event.message);
     }
     this.setState({ statuslist: this.statuslist });
-    this.setState({ devices: this.devices});
+    this.setState({ devices: this.devices });
   }
 
   async init() {
@@ -102,7 +103,7 @@ export class Home extends Component {
     }
   }
 
-  async writeLabel(){
+  async writeLabel() {
 
   }
 
@@ -112,6 +113,7 @@ export class Home extends Component {
 
   discover() {
     CIDPrint.discoverDevices();
+    this.setState({ load: true });
   }
 
   async connect(printer: Device) {
@@ -119,7 +121,9 @@ export class Home extends Component {
   }
 
   async connectToPrinter(mac: string) {
+    this.setState({ load: true });
     this.setState({ connected: await CIDPrint.connectToPreferredPrinter({ mac: mac }) });
+    
   }
 
   async connectToPW2() {
@@ -139,7 +143,12 @@ export class Home extends Component {
   async printInput(inputLabel: string) {
     this.setState({ status: 'printing Label' });
     CIDPrint.enableDispendingMode({ enable: false });
-    await CIDPrint.printData({ data: inputLabel });
+
+    const label = "^XA\n" +
+                  "^BY2,2,170\n" +
+                  "^FO150,50^BC^FD" + inputLabel + "^FS\n" +
+                  "^XZ\n"
+    await CIDPrint.printData({ data: label });
   }
 
   async printWithData(label: string, data: string[]) {
@@ -167,7 +176,8 @@ export class Home extends Component {
   }
 
   public async printESCPOS() {
-    CIDPrint.printLabel({label: 'lbl.bin'});
+    CIDPrint.printLabel({ label: 'lbl.bin' });
+    this.setState({ load: true });
   }
 
   getStatus() {
@@ -182,6 +192,11 @@ export class Home extends Component {
     this.printerListener = CIDPrint.addListener(CIDPrinterListenerTypes.PRINTER_LIBRARY, this.handlePrinterLibraryEvents.bind(this));
   }
 
+  showLoading() {
+    setTimeout(() => {
+      this.setState({ load: false})
+    }, 4000);
+  }
 
   render() {
     return (
@@ -192,7 +207,7 @@ export class Home extends Component {
           </IonToolbar>
         </IonHeader>
         <IonContent slot="fixed">
-          <IonList>
+          {/*           <IonList>
             <IonItem>
               <IonLabel>Printer</IonLabel>
               <IonSelect placeholder="Select Printer" onIonChange={((e) => this.onPrinterChanged((e.target as HTMLInputElement).value))}>
@@ -208,20 +223,26 @@ export class Home extends Component {
                 <IonSelectOption value="000190ec15a7">MB200i Firma</IonSelectOption>
               </IonSelect>
             </IonItem>
-          </IonList>
+          </IonList> */}
           <IonButton onClick={() => this.discover()}>Discover</IonButton>
-          <IonButton onClick={() => this.connectToPrinter(this.barcodevalue)}>Connect</IonButton>
+          <IonLoading
+            cssClass='my-custom-class'
+            onDidDismiss={() => this.setState({ load: false })}
+            message={'Please wait...'}
+            duration={7000} 
+            isOpen={this.state.load}          
+            />
+          {/*           <IonButton onClick={() => this.connectToPrinter(this.barcodevalue)}>Connect</IonButton>
           <IonButton onClick={() => this.getStatus()}>Get Printer Status</IonButton>
           <IonButton onClick={() => this.setMediaSize(46, 37)}>Set Media Size</IonButton>
-          <IonButton onClick={() => this.print('label22.dat')}>Print Label</IonButton>
-          <IonInput onIonChange={(e: any) => this.setState({ label: e.target.value})}></IonInput>
-          <IonButton onClick={() => this.printInput(this.state.label)}>Print Label</IonButton>
+          <IonButton onClick={() => this.print('label22.dat')}>Print Label</IonButton>*/}
+          <IonTextarea rows={6} onIonChange={(e: any) => this.setState({ label: e.target.value})}></IonTextarea>
+          {/* <IonInput onIonChange={(e: any) => this.setState({ label: e.target.value})}></IonInput> */}
+          <IonButton onClick={() => this.printInput(this.state.label)}>Print Label</IonButton> 
           <IonButton onClick={() => this.printESCPOS()}>Print Receipt</IonButton>
-        </IonContent>
-        <IonContent>
           <IonCard>
             <IonCardContent>
-            <IonList>
+              <IonList>
                 {this.state.devices.map((dev) => (
                   <IonItem onClick={() => this.connectToPrinter(dev.address)}><IonText>{dev.name} - {dev.address}</IonText></IonItem>
                 ))}
